@@ -11,17 +11,13 @@ import java.util.Date;
 import java.util.Timer;
 
 
-public class SampleTest extends TimerTask {
-    public void run() {
-        System.out.println("Timer task started at:" + new Date());
-        completeTask();
-        System.out.println("Timer task finished at:" + new Date());
-    }
+public class SampleTest  {
 
-    private void completeTask() {
+    public static void main(String[] args) {
+
         try {
             //assuming it takes 20 secs to complete the task
-            String providerFile = "/usr/local/providers/providers.xml";
+            String providerFile = "/usr/local/providers/*.xml";
             String metaFile = "/usr/local/providers/providersmeta.xml";
 
             SparkSession spark = SparkSession.builder().
@@ -35,8 +31,7 @@ public class SampleTest extends TimerTask {
                     .format("com.databricks.spark.xml")
                     .option("rowTag", "address")
                     .load(metaFile);
-
-
+            //System.out.println("Aradhya "+df.);
             df.show();
             df1.show();
 
@@ -47,7 +42,7 @@ public class SampleTest extends TimerTask {
 
             System.out.println("Numbes of Rows : " + df.count());
 
-            newdf.repartition(1).write()
+            newdf.where("city = 'Jabalpur'").repartition(1).write()
                     .mode("overwrite")
                     .format("com.databricks.spark.xml")
                     .option("rootTag", "providers")
@@ -58,21 +53,5 @@ public class SampleTest extends TimerTask {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
-
-        TimerTask timerTask = new SampleTest();
-        //running timer task as daemon thread
-        Timer timer = new Timer(true);
-        timer.scheduleAtFixedRate(timerTask, 0, 60 * 1000);
-        System.out.println("TimerTask started");
-        //cancel after sometime
-        try {
-            Thread.sleep(120000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
     }
 }
